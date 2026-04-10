@@ -7,7 +7,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
   email TEXT NOT NULL,
-  credits INTEGER NOT NULL DEFAULT 3,
+  credits INTEGER NOT NULL DEFAULT 5,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -23,14 +23,24 @@ CREATE TABLE IF NOT EXISTS videos (
   fal_request_id TEXT,
   fal_video_url TEXT,
   fal_thumbnail_url TEXT,
+  image_url TEXT,
+  duration TEXT NOT NULL DEFAULT '10' CHECK (duration IN ('5', '10')),
   status TEXT NOT NULL DEFAULT 'pending'
     CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
-  duration_seconds INTEGER NOT NULL DEFAULT 5,
+  duration_seconds INTEGER NOT NULL DEFAULT 10,
   credits_used INTEGER NOT NULL DEFAULT 1,
   error_message TEXT,
+  video_type TEXT NOT NULL DEFAULT 'quick' CHECK (video_type IN ('quick', 'story')),
+  language TEXT DEFAULT NULL CHECK (language IN ('en', 'hi', 'ta', 'te')),
+  scenes JSONB DEFAULT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Run this if videos table already exists:
+-- ALTER TABLE videos ADD COLUMN IF NOT EXISTS video_type TEXT NOT NULL DEFAULT 'quick' CHECK (video_type IN ('quick', 'story'));
+-- ALTER TABLE videos ADD COLUMN IF NOT EXISTS language TEXT DEFAULT NULL CHECK (language IN ('en', 'hi', 'ta', 'te'));
+-- ALTER TABLE videos ADD COLUMN IF NOT EXISTS scenes JSONB DEFAULT NULL;
 
 -- ============================================================
 -- CREDIT TRANSACTIONS
@@ -118,3 +128,16 @@ CREATE POLICY "Users can update own videos"
 -- Credit transactions
 CREATE POLICY "Users can view own transactions"
   ON credit_transactions FOR SELECT USING (auth.uid() = user_id);
+
+-- ============================================================
+-- STORAGE BUCKETS (create via Supabase Dashboard or CLI)
+-- ============================================================
+-- Bucket: person-images (public) — uploaded person/character photos
+-- Bucket: videos (public)        — final stitched story video files
+--
+-- person-images RLS:
+--   INSERT: authenticated users only
+--   SELECT: public
+-- videos RLS:
+--   INSERT: authenticated users only (service role used in API)
+--   SELECT: public

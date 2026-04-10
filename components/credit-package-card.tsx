@@ -38,8 +38,8 @@ export function CreditPackageCard({ pkg }: CreditPackageCardProps) {
       className={cn(
         'relative rounded-2xl border p-6 flex flex-col gap-4',
         pkg.popular
-          ? 'border-violet-500 bg-violet-50 shadow-lg shadow-violet-100'
-          : 'border-gray-200 bg-white'
+          ? 'border-violet-500 bg-violet-50 dark:bg-violet-950 shadow-lg shadow-violet-100 dark:shadow-violet-900'
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
       )}
     >
       {pkg.popular && (
@@ -52,13 +52,13 @@ export function CreditPackageCard({ pkg }: CreditPackageCardProps) {
       )}
 
       <div>
-        <h3 className="text-lg font-bold text-gray-900">{pkg.label}</h3>
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">{pkg.label}</h3>
         <div className="flex items-baseline gap-1 mt-1">
-          <span className="text-3xl font-extrabold text-gray-900">
+          <span className="text-3xl font-extrabold text-gray-900 dark:text-white">
             ${(pkg.price / 100).toFixed(2)}
           </span>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           {pkg.credits} AI videos &bull; ${((pkg.price / 100) / pkg.credits).toFixed(2)}/video
         </p>
       </div>
@@ -70,7 +70,7 @@ export function CreditPackageCard({ pkg }: CreditPackageCardProps) {
           'mt-auto w-full py-2.5 px-4 rounded-xl font-semibold text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed inline-flex items-center justify-center gap-2',
           pkg.popular
             ? 'bg-violet-600 hover:bg-violet-700 text-white'
-            : 'bg-gray-900 hover:bg-gray-800 text-white'
+            : 'bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-gray-200 text-white dark:text-gray-900'
         )}
       >
         {loading ? (

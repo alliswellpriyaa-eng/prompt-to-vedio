@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Video, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
+import { BookOpen, Loader2, AlertCircle, CheckCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
@@ -54,11 +54,11 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl border border-gray-200 p-8 w-full max-w-md text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 w-full max-w-md text-center">
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900">Check your email</h2>
-          <p className="text-gray-500 text-sm mt-2">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">Check your email</h2>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
             We sent a confirmation link to <strong>{email}</strong>. Click the link
             to activate your account and get 3 free credits.
           </p>
@@ -74,22 +74,22 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-gray-200 p-8 w-full max-w-md">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 font-bold text-gray-900 mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 font-bold text-gray-900 dark:text-white mb-4">
             <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
-              <Video className="w-4 h-4 text-white" />
+              <BookOpen className="w-4 h-4 text-white" />
             </div>
-            PromptToVideo
+            StoryReel
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-500 text-sm mt-1">Get 3 free video credits on signup</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Create your account</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Get 3 free video credits on signup</p>
         </div>
 
         <button
           onClick={handleGoogleSignup}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 mb-6"
+          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300 mb-6"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -114,10 +114,10 @@ export default function SignupPage() {
 
         <div className="relative mb-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200" />
+            <div className="w-full border-t border-gray-200 dark:border-gray-700" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-400">Or sign up with email</span>
+            <span className="bg-white dark:bg-gray-900 px-2 text-gray-400 dark:text-gray-500">Or sign up with email</span>
           </div>
         </div>
 
@@ -130,7 +130,7 @@ export default function SignupPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input
@@ -138,13 +138,13 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Password
             </label>
             <input
@@ -153,7 +153,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 placeholder:text-gray-400 dark:placeholder:text-gray-500"
               placeholder="Min. 6 characters"
             />
           </div>
@@ -174,7 +174,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Already have an account?{' '}
           <Link href="/auth/login" className="text-violet-600 font-medium hover:underline">
             Sign in

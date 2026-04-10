@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 import { enhancePrompt } from '@/lib/gemini'
-import { fal, FAL_MODEL } from '@/lib/fal'
+import { fal, getFalModel } from '@/lib/fal'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { prompt } = body
+    const { prompt, imageUrl, duration = '10' } = body
 
     if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ error: 'Prompt is required' }, { status: 400 })
@@ -39,24 +40,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check credits
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('credits')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile) {
+    // Rate limit: 5 quick videos per 10 minutes per user
+    const rateLimit = await checkRateLimit(supabase, user.id, 'quick')
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      )
-    }
-
-    if (profile.credits < 1) {
-      return NextResponse.json(
-        { error: 'Insufficient credits. Please purchase more credits.' },
-        { status: 402 }
+        {
+          error: `Too many requests. You can generate up to 5 quick videos per 10 minutes. Please wait ${Math.ceil((rateLimit.retryAfterSeconds ?? 600) / 60)} minutes.`,
+        },
+        { status: 429 }
       )
     }
 
@@ -75,8 +66,10 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         original_prompt: trimmedPrompt,
         enhanced_prompt: enhancedPrompt,
+        image_url: imageUrl || null,
+        duration,
         status: 'processing',
-        credits_used: 1,
+        credits_used: 0,
       })
       .select()
       .single()
@@ -88,55 +81,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Atomically deduct 1 credit
-    const { error: creditError } = await supabase
-      .from('profiles')
-      .update({ credits: profile.credits - 1 })
-      .eq('id', user.id)
-      .eq('credits', profile.credits) // optimistic lock
-
-    if (creditError) {
-      // Rollback video record
-      await supabase.from('videos').delete().eq('id', video.id)
-      return NextResponse.json(
-        { error: 'Failed to deduct credits' },
-        { status: 500 }
-      )
-    }
-
-    // Record the credit transaction
-    await supabase.from('credit_transactions').insert({
-      user_id: user.id,
-      amount: -1,
-      type: 'usage',
-      video_id: video.id,
-      description: `Video generation: ${trimmedPrompt.slice(0, 50)}`,
-    })
-
     // Submit to fal.ai queue
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const falModel = getFalModel(imageUrl)
 
     try {
-      const result = await fal.queue.submit(FAL_MODEL, {
-        input: {
-          prompt: enhancedPrompt,
-          duration: '5',
-          aspect_ratio: '16:9',
-        },
-        webhookUrl: `${appUrl}/api/fal-webhook`,
-      })
+      const falInput: Record<string, unknown> = {
+        prompt: enhancedPrompt,
+        duration,
+        aspect_ratio: '16:9',
+        cfg_scale: 0.5,
+        negative_prompt: 'blur, distort, low quality, deformed face',
+      }
 
-      // Save fal request_id
+      if (imageUrl) {
+        falInput.image_url = imageUrl
+      }
+
+      const result = await fal.queue.submit(falModel, { input: falInput })
+
       await supabase
         .from('videos')
         .update({ fal_request_id: result.request_id })
         .eq('id', video.id)
     } catch (falError) {
       console.error('fal.ai submission error:', falError)
-      // Mark video as failed but keep the record
       await supabase
         .from('videos')
-        .update({ status: 'failed', error_message: 'Failed to submit to video generation service' })
+        .update({
+          status: 'failed',
+          error_message: 'Failed to submit to video generation service',
+        })
         .eq('id', video.id)
 
       return NextResponse.json(
@@ -152,9 +126,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('generate-video error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

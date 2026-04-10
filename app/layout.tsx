@@ -6,12 +6,12 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'PromptToVideo — AI Video Generation',
+  title: 'StoryReel — AI Story Videos for YouTube Creators',
   description:
-    'Turn any text prompt into a stunning AI-generated video. Powered by Kling AI and Claude.',
+    'Turn any kids story into a YouTube-ready video with multilingual voiceover. Powered by Kling AI and Gemini.',
   openGraph: {
-    title: 'PromptToVideo',
-    description: 'Turn any text prompt into a stunning AI-generated video.',
+    title: 'StoryReel',
+    description: 'Turn any story into an AI-generated video with multilingual voiceover.',
     type: 'website',
   },
 }
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>{children}</Providers>
       </body>

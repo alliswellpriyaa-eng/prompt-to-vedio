@@ -14,14 +14,17 @@ interface VideoCardProps {
 
 export function VideoCard({ video }: VideoCardProps) {
   const [open, setOpen] = useState(false)
+  const [deleted, setDeleted] = useState(false)
+
+  if (deleted) return null
 
   return (
     <>
       <div
-        className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+        className="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
         onClick={() => setOpen(true)}
       >
-        <div className="relative aspect-video bg-gray-100">
+        <div className="relative aspect-video bg-gray-100 dark:bg-gray-700">
           {video.fal_thumbnail_url ? (
             <Image
               src={video.fal_thumbnail_url}
@@ -47,14 +50,20 @@ export function VideoCard({ video }: VideoCardProps) {
         </div>
 
         <div className="p-3">
-          <p className="text-sm font-medium text-gray-800 line-clamp-2">
+          <p className="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">
             {truncate(video.original_prompt, 80)}
           </p>
-          <p className="text-xs text-gray-400 mt-1">{formatDate(video.created_at)}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{formatDate(video.created_at)}</p>
         </div>
       </div>
 
-      {open && <VideoDialog video={video} onClose={() => setOpen(false)} />}
+      {open && (
+        <VideoDialog
+          video={video}
+          onClose={() => setOpen(false)}
+          onDelete={() => setDeleted(true)}
+        />
+      )}
     </>
   )
 }
